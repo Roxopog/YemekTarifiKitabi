@@ -1,0 +1,4 @@
+package roomdb
+
+class tarifDataBase {
+}
