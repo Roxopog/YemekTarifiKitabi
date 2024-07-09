@@ -1,4 +1,4 @@
-package com.burak.yemektarifi2
+package com.burak.yemektarifi2.view
 
 import android.Manifest
 import android.content.Intent
@@ -13,21 +13,35 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.activity.result.ActivityResult
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.navigation.Navigation
+import androidx.room.Room
 import com.burak.yemektarifi2.databinding.FragmentTarifBinding
 import com.google.android.material.snackbar.Snackbar
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
+import io.reactivex.rxjava3.core.Scheduler
+import io.reactivex.rxjava3.disposables.CompositeDisposable
+import io.reactivex.rxjava3.disposables.Disposable
+import io.reactivex.rxjava3.schedulers.Schedulers
+import model.Tarif
+import roomdb.TarifDAO
+import roomdb.tarifDataBase
+import java.io.ByteArrayOutputStream
+import kotlin.math.max
 
 
 class tarifFragment : Fragment() {
     private var secilenGorsel :Uri?=null
     private var secilenBitmap : Bitmap?= null
     private var _binding: FragmentTarifBinding? = null
+    private lateinit var db : tarifDataBase
+    private lateinit var TarifDao : TarifDAO
+    private var mDisposable = CompositeDisposable()
     // This property is only valid between onCreateView and
 // onDestroyView.
     private val binding get() = _binding!!
@@ -36,6 +50,8 @@ class tarifFragment : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         registerLauncher()
+        db = Room.databaseBuilder(requireContext(),tarifDataBase::class.java,"tarifler").build()
+        TarifDao = db.TarifDAO()
     }
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -69,8 +85,29 @@ class tarifFragment : Fragment() {
     }
 
     fun kaydet(view: View){
+        val isim = binding.isimText.toString()
+        val malzeme = binding.malzemeText.toString()
+        if(secilenBitmap != null){
+            val kucukbitmap = kucukBitMapOlustur(secilenBitmap!!,300)
+            val outputStream = ByteArrayOutputStream()
+            kucukbitmap.compress(Bitmap.CompressFormat.JPEG,100,outputStream)
+            val byteDizisi = outputStream.toByteArray()
+            val tarif = Tarif(isim,malzeme,byteDizisi)
+
+            //RxJava
+            mDisposable.add(TarifDao.insert(tarif).subscribeOn(Schedulers.io()).
+            observeOn(AndroidSchedulers.mainThread()).subscribe(this::handleResponseForInsert))
+
+        }
+    }
+
+    private fun handleResponseForInsert(){
+        //bir önceki fragmente dön başarılı toast mesajı yaz.
+        val action = tarifFragmentDirections.actionTarifFragmentToListeFragment()
+        Navigation.findNavController(requireView()).navigate(action)
 
     }
+
     fun sil(view: View){
 
     }
@@ -168,6 +205,27 @@ class tarifFragment : Fragment() {
 
     }
 
+
+    fun kucukBitMapOlustur(kullanicininSectigiBitMap :Bitmap , maximumBoyut :Int) : Bitmap{
+        var width = kullanicininSectigiBitMap.width
+        var height = kullanicininSectigiBitMap.height
+        var oran : Double = width.toDouble()/height.toDouble()
+        if(oran > 1){
+            //görsel yatay.
+            width =maximumBoyut
+            val kisaltilmisYükseklik = width/oran
+            height = kisaltilmisYükseklik.toInt()
+        }
+        else{
+            //görsel dikey.
+            height = maximumBoyut
+            val kisaltilmisEn = height/oran
+            width = kisaltilmisEn.toInt()
+        }
+
+        return Bitmap.createScaledBitmap(kullanicininSectigiBitMap,width,height,true)
+
+    }
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null

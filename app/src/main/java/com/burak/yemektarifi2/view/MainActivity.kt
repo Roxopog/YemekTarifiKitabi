@@ -1,10 +1,11 @@
-package com.burak.yemektarifi2
+package com.burak.yemektarifi2.view
 
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.burak.yemektarifi2.R
 
 
 class MainActivity : AppCompatActivity() {

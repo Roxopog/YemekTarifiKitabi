@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".tarifFragment">
+    tools:context=".view.tarifFragment">
 
     <ImageView
         android:id="@+id/imageView"
@@ -20,7 +20,7 @@
         app:srcCompat="@drawable/image" />
 
     <EditText
-        android:id="@+id/editTextText"
+        android:id="@+id/isimText"
         android:layout_width="343dp"
         android:layout_height="42dp"
         android:layout_marginTop="30dp"
@@ -32,7 +32,7 @@
         app:layout_constraintTop_toBottomOf="@+id/imageView" />
 
     <EditText
-        android:id="@+id/editTextText3"
+        android:id="@+id/malzemeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
@@ -43,7 +43,7 @@
         android:inputType="text"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/editTextText" />
+        app:layout_constraintTop_toBottomOf="@+id/isimText" />
 
     <LinearLayout
         android:layout_width="396dp"
@@ -51,7 +51,8 @@
         android:layout_marginBottom="10dp"
         android:orientation="horizontal"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:layout_editor_absoluteX="1dp">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
 
         <Button
             android:id="@+id/KaydetButton"
