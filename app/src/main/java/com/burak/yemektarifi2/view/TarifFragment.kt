@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.ImageDecoder
 import android.net.Uri
 import android.os.Build
@@ -42,6 +43,7 @@ class tarifFragment : Fragment() {
     private lateinit var db : tarifDataBase
     private lateinit var TarifDao : TarifDAO
     private var mDisposable = CompositeDisposable()
+    private var secilenTarif :Tarif? = null
     // This property is only valid between onCreateView and
 // onDestroyView.
     private val binding get() = _binding!!
@@ -72,18 +74,34 @@ class tarifFragment : Fragment() {
             val bilgi = tarifFragmentArgs.fromBundle(it).bilgi
             if(bilgi == "yeni"){
                 //yeni bilgi gelmiş
+                secilenTarif = null
                 binding.KaydetButton.isEnabled = true
                 binding.SilButton.isEnabled =false
+                binding.isimText.setText("")
+                binding.malzemeText.setText("")
             }
             else{
                 //eski bilgiymiş
                 binding.KaydetButton.isEnabled =true
                 binding.SilButton.isEnabled = false
+                val id = tarifFragmentArgs.fromBundle(it).id
+
+                mDisposable.add(
+                    TarifDao.findById(id).subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread()).subscribe(this::handleResponse)
+                )
+
+
             }
 
         }
     }
-
+    private fun handleResponse(tarif: Tarif){
+        binding.isimText.setText(tarif.isim)
+        binding.malzemeText.setText(tarif.malzeme)
+        val bitmap = BitmapFactory.decodeByteArray(tarif.gorsel,0,tarif.gorsel.size)
+        binding.imageView.setImageBitmap(bitmap)
+        secilenTarif = tarif
+    }
     fun kaydet(view: View){
         val isim = binding.isimText.toString()
         val malzeme = binding.malzemeText.toString()
@@ -109,7 +127,14 @@ class tarifFragment : Fragment() {
     }
 
     fun sil(view: View){
-
+        if(secilenTarif != null){
+            mDisposable.add(
+                TarifDao.delete(tarif = secilenTarif!!)
+                    .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .subscribe(this::handleResponseForInsert)
+            )
+        }
     }
     fun gorselSec(view: View){
 

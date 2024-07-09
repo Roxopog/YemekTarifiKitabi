@@ -1,5 +1,6 @@
 package com.burak.yemektarifi2.view
 
+import adaptor.TarifAdapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -48,7 +49,7 @@ class ListeFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         binding.floatingActionButton.setOnClickListener { YeniEkle(it) }
         binding.tarifRecyclerView.layoutManager = LinearLayoutManager(requireContext())
-
+        verilerial()
     }
     private fun verilerial(){
         mDisposable.add(TarifDao.getALl()
@@ -57,7 +58,8 @@ class ListeFragment : Fragment() {
     }
 
     private fun handleResponse(tarifler : List<Tarif>){
-
+        val adapter = TarifAdapter(tarifler)
+        binding.tarifRecyclerView.adapter = adapter
     }
 
     fun YeniEkle(view: View){
